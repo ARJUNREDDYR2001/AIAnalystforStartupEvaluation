@@ -35,7 +35,7 @@ export default function DocumentAnalysis({ setAnalysisResult }: DocumentAnalysis
     }
     
     // Dynamically import pdf-parse only on the client-side when needed
-    const pdf = (await import('pdf-parse')).default;
+    const pdf = (await import('pdf-parse/lib/pdf-parse')).default;
 
     const newFileNames: string[] = [];
     let combinedContent = "";
