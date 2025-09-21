@@ -10,12 +10,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, FileUp, AlertTriangle, Quote } from "lucide-react";
+import { Loader2, FileUp, AlertTriangle, Quote, CheckCircle2 } from "lucide-react";
 import { sampleDocumentText } from "@/lib/data";
 import { detectDocumentDiscrepancies, DetectDocumentDiscrepanciesOutput } from "@/ai/flows/detect-document-discrepancies";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Separator } from "../ui/separator";
 
 export default function DocumentAnalysis() {
   const [isPending, startTransition] = useTransition();
@@ -59,7 +58,7 @@ export default function DocumentAnalysis() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 p-12">
+          <div className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 p-6 sm:p-12">
             <div className="text-center">
               <FileUp className="mx-auto h-12 w-12 text-muted-foreground" />
               <p className="mt-4 text-sm text-muted-foreground">
@@ -72,7 +71,7 @@ export default function DocumentAnalysis() {
           <Button
             onClick={handleAnalyzeDocument}
             disabled={isPending}
-            className="ml-auto"
+            className="w-full sm:w-auto sm:ml-auto"
           >
             {isPending ? (
               <Loader2 className="animate-spin" />

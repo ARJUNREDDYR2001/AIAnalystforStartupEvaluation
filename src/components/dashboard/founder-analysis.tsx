@@ -99,7 +99,7 @@ export default function FounderAnalysis() {
   const parseList = (text: string) => text.split('\n').map(item => item.trim().replace(/^\d+\.\s*/, '')).filter(Boolean);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-2">
+    <div className="grid gap-8 md:grid-cols-2">
       <Card>
         <CardHeader>
           <CardTitle>Founder Background</CardTitle>
@@ -141,7 +141,7 @@ export default function FounderAnalysis() {
         {result && (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+              <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 Founder Analysis Report
                 <Badge className={`${getScoreColor(result.integrityScore)} text-primary-foreground text-lg`}>
                   Score: {result.integrityScore}

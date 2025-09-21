@@ -110,8 +110,8 @@ export default function PeerBenchmarking() {
 
 
   return (
-    <div className="grid gap-8 lg:grid-cols-3">
-      <div className="lg:col-span-1">
+    <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+      <div className="md:col-span-2 lg:col-span-1">
         <Card>
           <CardHeader>
             <CardTitle>Search Startups</CardTitle>
@@ -153,7 +153,7 @@ export default function PeerBenchmarking() {
         </Card>
       </div>
 
-      <div className="lg:col-span-2 space-y-8">
+      <div className="md:col-span-2 space-y-8">
         {!selectedStartup && (
           <Card className="flex items-center justify-center p-16 h-full">
              <div className="text-center text-muted-foreground">
@@ -173,7 +173,7 @@ export default function PeerBenchmarking() {
           <>
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
+                <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <span>
                     Benchmark: {selectedStartup.name}
                   </span>
@@ -185,7 +185,7 @@ export default function PeerBenchmarking() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4 text-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
                     <div className="p-4 bg-muted/50 rounded-lg">
                         <p className="text-sm text-muted-foreground">ARR</p>
                         <p className="text-2xl font-bold">${selectedStartup.arr}M</p>
@@ -210,7 +210,7 @@ export default function PeerBenchmarking() {
               </CardHeader>
               <CardContent>
                 {radarData.length > 0 && (
-                  <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[350px]">
+                  <ChartContainer config={chartConfig} className="mx-auto aspect-square max-h-[250px] sm:max-h-[350px]">
                     <RadarChart data={radarData}>
                       <ChartTooltip
                         cursor={false}
