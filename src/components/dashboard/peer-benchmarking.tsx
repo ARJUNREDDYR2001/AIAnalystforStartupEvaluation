@@ -27,7 +27,6 @@ import {
   PolarGrid,
   PolarAngleAxis,
   Radar,
-  ResponsiveContainer,
 } from "recharts";
 
 type BenchmarkResult = {
@@ -97,11 +96,11 @@ export default function PeerBenchmarking() {
   const chartConfig = useMemo(() => {
     if (!selectedStartup) return {};
     return {
-      [selectedStartup.name]: {
+      value: {
         label: selectedStartup.name,
         color: "hsl(var(--chart-1))",
       },
-      Peers: {
+      average: {
         label: "Peer Average",
         color: "hsl(var(--chart-2))",
       },
@@ -138,7 +137,7 @@ export default function PeerBenchmarking() {
                     className={`w-full text-left p-3 rounded-md transition-colors ${
                       selectedStartup?.id === startup.id
                         ? "bg-accent text-accent-foreground"
-                        : "hover:bg-muted"
+                        : "hover:bg-muted/50"
                     }`}
                   >
                     <p className="font-semibold">{startup.name}</p>
@@ -196,7 +195,7 @@ export default function PeerBenchmarking() {
                     </div>
                 </div>
                 <div className="text-sm space-y-2 text-foreground/80">
-                  <h4 className="font-semibold text-foreground flex items-center"><Zap className="w-4 h-4 mr-2 text-accent" />AI Analysis</h4>
+                  <h4 className="font-semibold text-foreground flex items-center"><Zap className="w-4 h-4 mr-2 text-orange-400" />AI Analysis</h4>
                   <p>{result.analysis}</p>
                 </div>
               </CardContent>
@@ -220,14 +219,14 @@ export default function PeerBenchmarking() {
                       <PolarGrid />
                       <Radar
                         name={selectedStartup.name}
-                        dataKey={selectedStartup.name}
+                        dataKey="value"
                         fill="var(--color-value)"
                         fillOpacity={0.6}
                         stroke="var(--color-value)"
                       />
                       <Radar
                         name="Peers"
-                        dataKey="Peers"
+                        dataKey="average"
                         fill="var(--color-average)"
                         fillOpacity={0.6}
                         stroke="var(--color-average)"

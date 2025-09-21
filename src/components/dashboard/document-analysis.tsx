@@ -53,8 +53,7 @@ export default function DocumentAnalysis() {
         <CardHeader>
           <CardTitle>Document Discrepancy Detection</CardTitle>
           <CardDescription>
-            Upload a document (PDF, PPT, or text) to automatically detect
-            discrepancies in key numbers and claims.
+            Upload a document to automatically detect discrepancies in key numbers and claims.
           </CardDescription>
         </CardHeader>
         <CardContent>

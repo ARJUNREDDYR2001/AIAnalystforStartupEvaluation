@@ -90,9 +90,9 @@ export default function FounderAnalysis() {
   };
 
   const getScoreColor = (score: string) => {
-    if (["A", "B"].includes(score)) return "bg-green-500";
-    if (["C"].includes(score)) return "bg-yellow-500";
-    if (["D", "F"].includes(score)) return "bg-red-500";
+    if (["A", "B"].includes(score)) return "bg-green-500/20 text-green-300 border-green-400/30";
+    if (["C"].includes(score)) return "bg-yellow-500/20 text-yellow-300 border-yellow-400/30";
+    if (["D", "F"].includes(score)) return "bg-red-500/20 text-red-300 border-red-400/30";
     return "bg-muted";
   };
   
@@ -143,7 +143,7 @@ export default function FounderAnalysis() {
             <CardHeader>
               <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 Founder Analysis Report
-                <Badge className={`${getScoreColor(result.integrityScore)} text-primary-foreground text-lg`}>
+                <Badge variant="outline" className={`${getScoreColor(result.integrityScore)} text-lg`}>
                   Score: {result.integrityScore}
                 </Badge>
               </CardTitle>
@@ -153,7 +153,7 @@ export default function FounderAnalysis() {
             </CardHeader>
             <CardContent className="grid gap-6 sm:grid-cols-2">
               <div className="space-y-2">
-                <h3 className="font-semibold flex items-center text-green-600">
+                <h3 className="font-semibold flex items-center text-green-400">
                   <CheckCircle2 className="mr-2" /> Green Lights
                 </h3>
                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
@@ -161,7 +161,7 @@ export default function FounderAnalysis() {
                 </ul>
               </div>
               <div className="space-y-2">
-                <h3 className="font-semibold flex items-center text-red-600">
+                <h3 className="font-semibold flex items-center text-red-400">
                   <XCircle className="mr-2" /> Red Flags
                 </h3>
                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
@@ -191,7 +191,7 @@ export default function FounderAnalysis() {
               <ul className="space-y-3 text-sm">
                 {parseList(questions).map((q, i) => (
                   <li key={i} className="flex items-start">
-                    <div className="flex-shrink-0 w-4 h-4 rounded-full bg-accent mr-3 mt-1" />
+                    <div className="flex-shrink-0 w-3 h-3 rounded-full bg-orange-400/50 border border-orange-400 mr-3 mt-1.5" />
                     <span>{q}</span>
                   </li>
                 ))}
