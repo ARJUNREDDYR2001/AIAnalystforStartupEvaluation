@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useMemo, useCallback } from "react";
+import { useState, useTransition, useMemo, useCallback, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { mockStartupData, Startup } from "@/lib/data";
 import { benchmarkStartupAgainstPeers, BenchmarkStartupAgainstPeersOutput } from "@/ai/flows/benchmark-startup-against-peers";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Search, Zap, ArrowRightLeft, X } from "lucide-react";
+import { Loader2, Search, Zap, ArrowRightLeft, X, RefreshCw } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
 import { Badge } from "../ui/badge";
 import {
@@ -31,6 +31,7 @@ import {
   Radar,
   PolarRadiusAxis,
 } from "recharts";
+import { Checkbox } from "../ui/checkbox";
 
 interface PeerBenchmarkingProps {
   setAnalysisResult: (result: any | null) => void;
@@ -44,7 +45,8 @@ type RadarDataItem = {
 export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarkingProps) {
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStartups, setSelectedStartups] = useState<[Startup | null, Startup | null]>([null, null]);
+  const [selectedStartups, setSelectedStartups] = useState<Startup[]>([]);
+  const [primaryStartup, setPrimaryStartup] = useState<Startup | null>(null);
   const [result, setResult] = useState<BenchmarkStartupAgainstPeersOutput | null>(null);
   const { toast } = useToast();
 
@@ -55,53 +57,63 @@ export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarking
     );
   }, [searchQuery]);
 
-  const handleSelectStartup = (startup: Startup) => {
+  const handleSelectStartup = (startup: Startup, checked: boolean) => {
     setSelectedStartups(prev => {
-      if (!prev[0] || prev[0].id === startup.id) return [startup, prev[1]];
-      if (!prev[1] || prev[1].id === startup.id) return [prev[0], startup];
-      return [startup, null]; // Reset if both are selected
+        const isSelected = prev.some(s => s.id === startup.id);
+        if (checked && !isSelected) {
+            if (prev.length < 2) {
+                return [...prev, startup];
+            } else {
+                 toast({
+                    title: "Limit Reached",
+                    description: "You can only select up to two startups to compare.",
+                    variant: "destructive",
+                });
+                return prev;
+            }
+        } else if (!checked && isSelected) {
+            return prev.filter(s => s.id !== startup.id);
+        }
+        return prev;
     });
   };
-  
+
   const handleClearSelection = () => {
-    setSelectedStartups([null, null]);
+    setSelectedStartups([]);
     setResult(null);
     setAnalysisResult(null);
+    setPrimaryStartup(null);
   }
 
-  const handleRunAnalysis = useCallback(() => {
-    const [startup1] = selectedStartups;
-    if (!startup1) {
-      toast({
-        title: "Startup Not Selected",
-        description: "Please select at least one startup to analyze.",
-        variant: "destructive",
-      });
-      return;
+  const handleSetPrimary = (startup: Startup) => {
+    if (primaryStartup?.id !== startup.id) {
+        setPrimaryStartup(startup);
     }
+  };
+
+  const swapPrimary = () => {
+    if (selectedStartups.length === 2 && primaryStartup) {
+      const other = selectedStartups.find(s => s.id !== primaryStartup.id);
+      if (other) {
+        setPrimaryStartup(other);
+      }
+    }
+  }
+
+  const runAnalysis = useCallback((startupToAnalyze: Startup) => {
+    if (!startupToAnalyze) return;
 
     setResult(null);
-    setAnalysisResult(null);
     startTransition(async () => {
       try {
-        // Note: The flow is designed for one startup. We will call it with the first one.
-        // The comparison logic is primarily on the client-side for this UI implementation.
         const benchmarkResult = await benchmarkStartupAgainstPeers({
-          companyName: startup1.name,
-          arr: startup1.arr,
-          burnMultiple: startup1.burnMultiple,
-          industry: startup1.industry,
-          stage: startup1.stage,
+          companyName: startupToAnalyze.name,
+          arr: startupToAnalyze.arr,
+          burnMultiple: startupToAnalyze.burnMultiple,
+          industry: startupToAnalyze.industry,
+          stage: startupToAnalyze.stage,
         });
         setResult(benchmarkResult);
-        
-        // We pass both startups to the parent for the investment memo.
-        setAnalysisResult({
-            ...benchmarkResult,
-            selectedStartups,
-            // The radar data from the flow is for one company + peers. We will create our own.
-            radarChartData: createRadarData(selectedStartups)
-        });
 
       } catch (error) {
         console.error("Error benchmarking startup:", error);
@@ -112,14 +124,53 @@ export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarking
         });
       }
     });
-  }, [selectedStartups, setAnalysisResult, toast]);
+  }, [toast]);
 
-  const createRadarData = (startups: [Startup | null, Startup | null]): RadarDataItem[] => {
+  useEffect(() => {
+    const [s1] = selectedStartups;
+    // If only one is selected, it must be primary
+    if (selectedStartups.length === 1) {
+      setPrimaryStartup(s1);
+    } 
+    // If selections are cleared, clear primary
+    else if (selectedStartups.length === 0) {
+        setPrimaryStartup(null);
+        setResult(null);
+    } 
+    // If a primary existed but was deselected, make the other one primary
+    else if (selectedStartups.length === 2 && primaryStartup && !selectedStartups.some(s => s.id === primaryStartup.id)) {
+        const newPrimary = selectedStartups.find(s => s.id !== primaryStartup.id);
+        setPrimaryStartup(newPrimary || null);
+    }
+    // If there was no primary and now there are two, make the first one primary
+    else if (selectedStartups.length === 2 && !primaryStartup) {
+        setPrimaryStartup(s1);
+    }
+
+  }, [selectedStartups, primaryStartup]);
+
+  useEffect(() => {
+    // Run analysis whenever the primary startup changes
+    if (primaryStartup) {
+      runAnalysis(primaryStartup);
+    }
+  }, [primaryStartup, runAnalysis]);
+
+  useEffect(() => {
+    // Pass results up to parent for investment memo
+    setAnalysisResult({
+        ...result,
+        selectedStartups,
+        // The radar data from the flow is for one company + peers. We will create our own.
+        radarChartData: createRadarData(selectedStartups)
+    });
+  }, [result, selectedStartups, setAnalysisResult]);
+
+  const createRadarData = (startups: Startup[]): RadarDataItem[] => {
       const [s1, s2] = startups;
       const data: RadarDataItem[] = [
           { metric: 'ARR ($M)', company1: s1?.arr || 0, company2: s2?.arr || 0 },
           { metric: 'Burn Multiple (x)', company1: s1?.burnMultiple || 0, company2: s2?.burnMultiple || 0 },
-          // Add more metrics here if available, e.g., from a more detailed API
           { metric: 'Valuation ($M)', company1: (s1?.arr || 0) * 10, company2: (s2?.arr || 0) * 10 }, // Mocked
           { metric: 'Team Size', company1: (s1?.arr || 0) * 5, company2: (s2?.arr || 0) * 5 }, // Mocked
           { metric: 'Market Share (%)', company1: (s1?.arr || 0) * 1.5, company2: (s2?.arr || 0) * 1.5 }, // Mocked
@@ -128,7 +179,7 @@ export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarking
   }
   
   const radarData: RadarDataItem[] = useMemo(() => {
-    if (selectedStartups[0] === null && selectedStartups[1] === null) return [];
+    if (selectedStartups.length === 0) return [];
     return createRadarData(selectedStartups);
   }, [selectedStartups]);
 
@@ -169,40 +220,39 @@ export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarking
               />
             </div>
             <ScrollArea className="h-[400px]">
-              <div className="space-y-2">
-                {filteredStartups.map((startup) => (
-                  <button
+              <div className="space-y-1 pr-4">
+                {filteredStartups.map((startup) => {
+                  const isSelected = selectedStartups.some(s => s.id === startup.id);
+                  return (
+                  <div
                     key={startup.id}
-                    onClick={() => handleSelectStartup(startup)}
-                    className={`w-full text-left p-3 rounded-md transition-colors ${
-                      selectedStartups.some(s => s?.id === startup.id)
-                        ? "bg-accent text-accent-foreground"
-                        : "hover:bg-muted/50"
+                    className={`flex items-center w-full text-left p-2 rounded-md transition-colors ${
+                      isSelected ? "bg-accent/50" : "hover:bg-muted/50"
                     }`}
                   >
-                    <p className="font-semibold">{startup.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {startup.industry} - {startup.stage}
-                    </p>
-                  </button>
-                ))}
+                    <Checkbox 
+                        id={`startup-${startup.id}`}
+                        checked={isSelected}
+                        onCheckedChange={(checked) => handleSelectStartup(startup, !!checked)}
+                        className="mr-3"
+                    />
+                    <label htmlFor={`startup-${startup.id}`} className="flex-1 cursor-pointer">
+                        <p className="font-semibold">{startup.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                        {startup.industry} - {startup.stage}
+                        </p>
+                    </label>
+                  </div>
+                )})}
               </div>
             </ScrollArea>
           </CardContent>
           <CardFooter className="flex flex-col gap-2">
-             <Button
-                onClick={handleRunAnalysis}
-                disabled={isPending || !selectedStartups[0]}
-                className="w-full"
-              >
-                {isPending ? <Loader2 className="animate-spin" /> : <Zap />}
-                Analyze
-              </Button>
               <Button
                   onClick={handleClearSelection}
                   variant="outline"
                   className="w-full"
-                  disabled={!selectedStartups[0] && !selectedStartups[1]}
+                  disabled={selectedStartups.length === 0}
                 >
                   <X className="mr-2 h-4 w-4" />
                   Clear Selection
@@ -212,7 +262,7 @@ export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarking
       </div>
 
       <div className="md:col-span-2 space-y-8">
-        {!selectedStartups[0] && !selectedStartups[1] && (
+        {selectedStartups.length === 0 ? (
           <Card className="flex items-center justify-center p-16 h-full">
              <div className="text-center text-muted-foreground">
                 <Search className="mx-auto h-12 w-12" />
@@ -220,32 +270,27 @@ export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarking
                 <p className="text-sm">Choose one or two startups to begin the analysis.</p>
               </div>
           </Card>
-        )}
-        
-        {isPending && (
-          <Card className="flex items-center justify-center p-16">
-            <Loader2 className="h-12 w-12 animate-spin text-muted-foreground" />
-            <p className="ml-4 text-muted-foreground">Generating analysis...</p>
-          </Card>
-        )}
-
-        {selectedStartups[0] && (
+        ) : (
           <>
              <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                    <ArrowRightLeft className="mr-3" />
-                    Side-by-Side Comparison
+                <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center"><ArrowRightLeft className="mr-3" />Side-by-Side Comparison</div>
+                    {selectedStartups.length === 2 && (
+                      <Button variant="ghost" size="sm" onClick={swapPrimary} title="Swap primary analysis">
+                        <RefreshCw className="mr-2 h-4 w-4" /> Swap
+                      </Button>
+                    )}
                 </CardTitle>
                 <CardDescription>
-                  Key metrics for the selected companies. AI analysis is based on the first selected startup.
+                  Key metrics for the selected companies. AI analysis runs on the primary startup.
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {selectedStartups.map((startup, i) => startup && (
-                    <div key={startup.id} className="p-4 bg-muted/30 rounded-lg border">
+                    <div key={startup.id} onClick={() => handleSetPrimary(startup)} className={`p-4 bg-muted/30 rounded-lg border-2 cursor-pointer transition-colors ${primaryStartup?.id === startup.id ? 'border-primary' : 'border-transparent hover:border-muted-foreground/50'}`}>
                         <div className="flex justify-between items-start mb-2">
-                            <h3 className="font-bold text-lg" style={{color: chartConfig[`company${i+1}` as keyof typeof chartConfig].color}}>{startup.name}</h3>
+                            <h3 className="font-bold text-lg" style={{color: chartConfig[i === 0 ? 'company1' : 'company2'].color}}>{startup.name}</h3>
                             <Badge variant="secondary">{startup.stage}</Badge>
                         </div>
                         <div className="grid grid-cols-2 gap-2 text-center">
@@ -261,11 +306,18 @@ export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarking
                     </div>
                 ))}
               </CardContent>
-               {result && (
-                <CardFooter>
+               {(isPending || result) && (
+                <CardFooter className="flex-col items-start gap-4">
                     <div className="text-sm space-y-2 text-foreground/80 w-full">
-                        <h4 className="font-semibold text-foreground flex items-center"><Zap className="w-4 h-4 mr-2 text-orange-400" />AI Analysis on {selectedStartups[0]?.name}</h4>
-                        <p className="text-muted-foreground">{result.analysis}</p>
+                        <h4 className="font-semibold text-foreground flex items-center"><Zap className="w-4 h-4 mr-2 text-orange-400" />AI Analysis on {primaryStartup?.name}</h4>
+                        {isPending ? (
+                             <div className="flex items-center text-muted-foreground">
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                <p>Generating analysis...</p>
+                            </div>
+                        ) : result ? (
+                            <p className="text-muted-foreground">{result.analysis}</p>
+                        ) : null }
                     </div>
                 </CardFooter>
                )}
