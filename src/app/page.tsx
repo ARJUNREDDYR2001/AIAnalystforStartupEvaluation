@@ -73,9 +73,9 @@ export default function Home() {
   };
 
   return (
-      <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="flex h-full">
         {/* Desktop Sidebar */}
-        <div className="hidden md:block fixed top-16 left-0 bottom-0 w-64 border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg z-40 overflow-y-auto transition-all duration-200">
+        <div className="hidden md:block w-64 border-r border-slate-700 bg-slate-800 shadow-lg z-40 overflow-y-auto transition-all duration-200">
           <div className="p-4">
             <DashboardSidebarContent activeTab={activeTab} setActiveTab={setActiveTab} />
           </div>
@@ -83,7 +83,7 @@ export default function Home() {
 
         {/* Mobile Sidebar */}
         <div className="md:hidden">
-          <Sidebar side="left" className="!border-r border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+          <Sidebar side="left" className="!border-r border-slate-700 bg-slate-800">
             <div className="pt-16">
               <DashboardSidebarContent activeTab={activeTab} setActiveTab={setActiveTab} />
             </div>
@@ -91,21 +91,19 @@ export default function Home() {
         </div>
         
         {/* Main Content */}
-        <div className="flex-1 md:ml-64">
+        <div className="flex-1">
           {/* Mobile Menu Button */}
-          <div className="md:hidden fixed top-16 left-0 right-0 z-40 bg-white dark:bg-slate-800 p-4 border-b border-slate-200 dark:border-slate-700 shadow-sm">
+          <div className="md:hidden sticky top-16 z-30 bg-background/50 backdrop-blur-md p-4 border-b border-slate-700 shadow-sm">
             <SidebarTrigger>
-              <PanelLeft className="mr-2 text-slate-700 dark:text-slate-200"/>
-              <span className="text-slate-700 dark:text-slate-200">Menu</span>
+              <PanelLeft className="mr-2 text-slate-200"/>
+              <span className="text-slate-200">Menu</span>
             </SidebarTrigger>
           </div>
           
           {/* Content */}
-          <div className="pt-16">
-            <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">
-              <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
-                {renderContent()}
-              </div>
+          <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">
+            <div className="rounded-xl shadow-sm">
+              {renderContent()}
             </div>
           </div>
         </div>
