@@ -91,9 +91,9 @@ export default function Home() {
         </div>
         
         {/* Main Content */}
-        <div className="flex-1">
+        <div className="flex-1 pt-16">
           {/* Mobile Menu Button */}
-          <div className="md:hidden sticky top-16 z-30 bg-background/50 backdrop-blur-md p-4 border-b border-slate-700 shadow-sm">
+          <div className="md:hidden fixed top-16 left-0 right-0 z-30 bg-slate-800/95 backdrop-blur-md p-4 border-b border-slate-700 shadow-sm">
             <SidebarTrigger>
               <PanelLeft className="mr-2 text-slate-200"/>
               <span className="text-slate-200">Menu</span>
@@ -102,7 +102,7 @@ export default function Home() {
           
           {/* Content */}
           <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">
-            <div className="rounded-xl shadow-sm">
+            <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
               {renderContent()}
             </div>
           </div>
