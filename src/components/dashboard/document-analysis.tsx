@@ -189,17 +189,20 @@ export function DocumentAnalysis({ setAnalysisResult }: DocumentAnalysisProps) {
             </div>
           </div>
           {fileNames.length > 0 && (
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between rounded-md border bg-muted/50 p-3">
-                  <div className="flex items-center gap-3 overflow-hidden">
-                    <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                    <span className="text-sm font-medium truncate" title={fileNames.join(', ')}>{fileNames.join(', ')}</span>
-                  </div>
-                   <Button variant="ghost" size="icon" onClick={clearFiles} className="h-6 w-6 flex-shrink-0">
-                      <X className="h-4 w-4" />
-                      <span className="sr-only">Clear all files</span>
+            <div className="mt-4 border rounded-lg p-3 space-y-2">
+                <div className="flex justify-between items-center mb-2">
+                    <h4 className="font-semibold">Uploaded Files</h4>
+                    <Button variant="ghost" size="icon" onClick={clearFiles} className="h-6 w-6">
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Clear all files</span>
                     </Button>
                 </div>
+              {fileNames.map((name, index) => (
+                <div key={index} className="flex items-center gap-3 overflow-hidden bg-muted/50 p-2 rounded-md">
+                    <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <span className="text-sm font-medium truncate" title={name}>{name}</span>
+                </div>
+              ))}
             </div>
           )}
         </CardContent>
