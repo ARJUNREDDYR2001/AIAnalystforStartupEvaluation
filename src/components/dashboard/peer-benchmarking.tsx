@@ -58,10 +58,11 @@ export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarking
   }, [searchQuery]);
 
   const handleSelectStartup = (startup: Startup, checked: boolean) => {
-    const isSelected = selectedStartups.some(s => s.id === startup.id);
-    
+    let currentSelection = [...selectedStartups];
+    const isSelected = currentSelection.some(s => s.id === startup.id);
+
     if (checked && !isSelected) {
-      if (selectedStartups.length >= 2) {
+      if (currentSelection.length >= 2) {
         toast({
           title: "Limit Reached",
           description: "You can only select up to two startups to compare.",
@@ -69,10 +70,12 @@ export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarking
         });
         return;
       }
-      setSelectedStartups(prev => [...prev, startup]);
+      currentSelection.push(startup);
     } else if (!checked && isSelected) {
-      setSelectedStartups(prev => prev.filter(s => s.id !== startup.id));
+      currentSelection = currentSelection.filter(s => s.id !== startup.id);
     }
+    
+    setSelectedStartups(currentSelection);
   };
 
   const handleClearSelection = () => {
@@ -335,7 +338,7 @@ export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarking
                         cursor={false}
                         content={<ChartTooltipContent indicator="line" />}
                       />
-                      <PolarAngleAxis dataKey="metric" />
+                      <PolarAngleAxis dataKey="metric" tick={{ dy: 4, textAnchor: 'middle' }} />
                       <PolarRadiusAxis angle={30} domain={[0, 'dataMax + 10']} />
                       <PolarGrid />
                       {selectedStartups[0] && <Radar
