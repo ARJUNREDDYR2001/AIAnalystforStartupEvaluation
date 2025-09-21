@@ -26,7 +26,7 @@ export default function RootLayout({
           <div className="fixed top-0 left-0 w-full h-screen bg-gradient-to-br from-teal-100 via-blue-100 to-gray-100 dark:from-indigo-900/30 dark:via-purple-900/20 dark:to-stone-900/40 z-[-1]"></div>
           <div className="flex flex-col min-h-screen">
             <Header />
-            <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-auto">
+            <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-auto pt-16">
               {children}
             </main>
           </div>
