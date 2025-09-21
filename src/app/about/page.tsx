@@ -20,7 +20,7 @@ export default function AboutPage() {
               <strong>Founder Analysis:</strong> Go beyond the resume. Our AI analyzes founder biographies to generate an "Integrity Score," identifying key character strengths (Green Lights) and potential risks (Red Flags). It also generates targeted due diligence questions to guide investor conversations.
             </li>
             <li>
-              <strong>Document Discrepancy Detection:</strong> Automatically scan multiple pitch decks, financial statements, and other PDF documents for inconsistencies. Our system flags conflicting numbers and claims, ensuring what you read on page 2 aligns with what's on page 20.
+              <strong>Document Discrepancy Detection:</strong> Automatically scan multiple PDF documents for inconsistencies. Our system flags conflicting numbers and claims, ensuring what you read on page 2 aligns with what's on page 20.
             </li>
             <li>
               <strong>Peer Benchmarking:</strong> Context is everything. Select up to two startups and compare their key metrics like ARR and burn multiple side-by-side. A dynamic radar chart provides an instant visual comparison, helping you see where a company leads and where it lags.

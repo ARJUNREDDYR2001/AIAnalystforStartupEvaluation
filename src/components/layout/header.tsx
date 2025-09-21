@@ -1,13 +1,11 @@
 import Link from "next/link";
-import { Flame, Info, Phone } from "lucide-react";
-import { SidebarTrigger } from "../ui/sidebar";
+import { Flame } from "lucide-react";
 import { Button } from "../ui/button";
 
 export function Header() {
   return (
     <header className="flex items-center justify-between gap-4 px-4 sm:px-6 h-16 glass-nav">
       <div className="flex items-center gap-4">
-        <SidebarTrigger className="md:hidden" />
         <Link href="/" className="flex items-center gap-2">
           <div className="p-2 bg-primary/10 rounded-full">
               <Flame className="w-7 h-7 text-orange-400" />
@@ -21,7 +19,10 @@ export function Header() {
         </Link>
       </div>
 
-      <nav className="hidden md:flex items-center gap-2">
+      <nav className="flex items-center gap-2">
+        <Button variant="ghost" asChild>
+          <Link href="/">Dashboard</Link>
+        </Button>
         <Button variant="ghost" asChild>
           <Link href="/about">About</Link>
         </Button>
