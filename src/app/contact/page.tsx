@@ -3,7 +3,7 @@ import { User, Building, Phone } from "lucide-react";
 
 export default function ContactPage() {
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="pt-10 w-full">
       <Card>
         <CardHeader>
           <CardTitle>Contact Us</CardTitle>

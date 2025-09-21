@@ -101,7 +101,7 @@ export default function FounderAnalysis({ setAnalysisResult }: FounderAnalysisPr
   const parseList = (text: string) => text.split('\n').map(item => item.trim().replace(/^\d+\.\s*/, '')).filter(Boolean);
 
   return (
-    <div className="grid gap-8 md:grid-cols-2">
+    <div className=" w-full">
       <Card>
         <CardHeader>
           <CardTitle>Founder Background</CardTitle>
@@ -122,7 +122,7 @@ export default function FounderAnalysis({ setAnalysisResult }: FounderAnalysisPr
           <Button variant="outline" onClick={loadSample}>
             Load Sample
           </Button>
-          <Button onClick={handleAnalyzebios} disabled={isPending}>
+          <Button onClick={handleAnalyzebios} disabled={isPending} className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600">
             {isPending ? (
               <Loader2 className="animate-spin" />
             ) : (

@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function AboutPage() {
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="w-full pt-10 mt-2">
       <Card>
         <CardHeader>
           <CardTitle>About VentureLens AI</CardTitle>

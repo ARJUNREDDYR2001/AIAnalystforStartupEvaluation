@@ -75,7 +75,7 @@ export default function Home() {
   return (
       <div className="flex h-full">
         {/* Desktop Sidebar */}
-        <div className="hidden md:block w-64 border-r border-slate-700 bg-slate-800 shadow-lg z-40 overflow-y-auto transition-all duration-200 pt-20">
+        <div className="hidden md:block w-64 border-r border-slate-700 bg-slate-800 shadow-lg z-40 overflow-y-auto transition-all duration-200 pt-16">
           <div className="p-4">
             <DashboardSidebarContent activeTab={activeTab} setActiveTab={setActiveTab} />
           </div>
@@ -83,8 +83,8 @@ export default function Home() {
 
         {/* Mobile Sidebar */}
         <div className="md:hidden">
-          <Sidebar side="left" className="!border-r border-slate-700 bg-slate-800">
-            <div className="pt-16">
+          <Sidebar side="left" className="!border-r border-slate-700 bg-slate-800 pt-16">
+            <div className="pt-4">
               <DashboardSidebarContent activeTab={activeTab} setActiveTab={setActiveTab} />
             </div>
           </Sidebar>
@@ -101,8 +101,8 @@ export default function Home() {
           </div>
           
           {/* Content */}
-          <div className="p-4 sm:p-6 md:p-8 max-w-7xl mx-auto w-full">
-            <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700">
+          <div className="p-4  w-full">
+            <div className="rounded-xl p-6 border border-slate-700">
               {renderContent()}
             </div>
           </div>
