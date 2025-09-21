@@ -58,24 +58,21 @@ export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarking
   }, [searchQuery]);
 
   const handleSelectStartup = (startup: Startup, checked: boolean) => {
-    setSelectedStartups(prev => {
-        const isSelected = prev.some(s => s.id === startup.id);
-        if (checked && !isSelected) {
-            if (prev.length < 2) {
-                return [...prev, startup];
-            } else {
-                 toast({
-                    title: "Limit Reached",
-                    description: "You can only select up to two startups to compare.",
-                    variant: "destructive",
-                });
-                return prev;
-            }
-        } else if (!checked && isSelected) {
-            return prev.filter(s => s.id !== startup.id);
-        }
-        return prev;
-    });
+    const isSelected = selectedStartups.some(s => s.id === startup.id);
+    
+    if (checked && !isSelected) {
+      if (selectedStartups.length >= 2) {
+        toast({
+          title: "Limit Reached",
+          description: "You can only select up to two startups to compare.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setSelectedStartups(prev => [...prev, startup]);
+    } else if (!checked && isSelected) {
+      setSelectedStartups(prev => prev.filter(s => s.id !== startup.id));
+    }
   };
 
   const handleClearSelection = () => {
