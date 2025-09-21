@@ -75,7 +75,7 @@ export default function Home() {
   return (
       <div className="flex h-full">
         {/* Desktop Sidebar */}
-        <div className="hidden md:block w-64 border-r border-slate-700 bg-slate-800 shadow-lg z-40 overflow-y-auto transition-all duration-200">
+        <div className="hidden md:block w-64 border-r border-slate-700 bg-slate-800 shadow-lg z-40 overflow-y-auto transition-all duration-200 pt-16">
           <div className="p-4">
             <DashboardSidebarContent activeTab={activeTab} setActiveTab={setActiveTab} />
           </div>
@@ -91,7 +91,7 @@ export default function Home() {
         </div>
         
         {/* Main Content */}
-        <div className="flex-1 pt-16">
+        <div className="flex-1 bg-slate-900/50">
           {/* Mobile Menu Button */}
           <div className="md:hidden fixed top-16 left-0 right-0 z-30 bg-slate-800/95 backdrop-blur-md p-4 border-b border-slate-700 shadow-sm">
             <SidebarTrigger>

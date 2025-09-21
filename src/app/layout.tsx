@@ -24,10 +24,8 @@ export default function RootLayout({
       <body className="font-body antialiased min-h-screen bg-background">
         <SidebarProvider>
           <div className="flex flex-col min-h-screen">
-            <div className="w-full">
-              <Header />
-            </div>
-            <main className="flex-1 w-full">
+            <Header />
+            <main className="flex-1 w-full pt-16">
               {children}
             </main>
           </div>
