@@ -17,7 +17,11 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import pdf from "pdf-parse/lib/pdf-parse";
 
-export default function DocumentAnalysis() {
+interface DocumentAnalysisProps {
+  setAnalysisResult: (result: DetectDocumentDiscrepanciesOutput | null) => void;
+}
+
+export default function DocumentAnalysis({ setAnalysisResult }: DocumentAnalysisProps) {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<DetectDocumentDiscrepanciesOutput | null>(null);
   const [documentContent, setDocumentContent] = useState<string>("");
@@ -68,6 +72,7 @@ export default function DocumentAnalysis() {
         setDocumentContent(combinedContent);
         setFileNames(newFileNames);
         setResult(null);
+        setAnalysisResult(null);
       } catch (error) {
         // Errors are toasted inside the promise rejection
       }
@@ -85,6 +90,7 @@ export default function DocumentAnalysis() {
       return;
     }
     setResult(null);
+    setAnalysisResult(null);
     startTransition(async () => {
       try {
         const analysisResult = await detectDocumentDiscrepancies({
@@ -92,6 +98,7 @@ export default function DocumentAnalysis() {
           documentType: "pdf",
         });
         setResult(analysisResult);
+        setAnalysisResult(analysisResult);
         if (analysisResult.discrepancies.length === 0) {
           toast({
             title: "Analysis Complete",
@@ -113,6 +120,7 @@ export default function DocumentAnalysis() {
     setDocumentContent("");
     setFileNames([]);
     setResult(null);
+    setAnalysisResult(null);
     if(fileInputRef.current) {
         fileInputRef.current.value = "";
     }

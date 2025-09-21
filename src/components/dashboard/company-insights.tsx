@@ -15,7 +15,11 @@ import { Loader2, Search, Building2, Zap, ShieldCheck, ShieldAlert, TrendingUp, 
 import { useToast } from "@/hooks/use-toast";
 import { generateCompanyInsights, GenerateCompanyInsightsOutput } from "@/ai/flows/generate-company-insights";
 
-export default function CompanyInsights() {
+interface CompanyInsightsProps {
+  setAnalysisResult: (result: GenerateCompanyInsightsOutput | null) => void;
+}
+
+export default function CompanyInsights({ setAnalysisResult }: CompanyInsightsProps) {
   const [isPending, startTransition] = useTransition();
   const [companyName, setCompanyName] = useState("");
   const [result, setResult] = useState<GenerateCompanyInsightsOutput | null>(null);
@@ -32,10 +36,13 @@ export default function CompanyInsights() {
     }
 
     setResult(null);
+    setAnalysisResult(null);
+
     startTransition(async () => {
       try {
         const analysisResult = await generateCompanyInsights({ companyName });
         setResult(analysisResult);
+        setAnalysisResult(analysisResult);
       } catch (error) {
         console.error("Error analyzing company:", error);
         toast({

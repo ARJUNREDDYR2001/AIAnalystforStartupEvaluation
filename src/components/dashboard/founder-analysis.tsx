@@ -13,22 +13,22 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, CheckCircle2, XCircle, BrainCircuit } from "lucide-react";
 import { sampleFounderBios } from "@/lib/data";
-import { generateIntegrityScore } from "@/ai/flows/generate-integrity-score";
+import { generateIntegrityScore, GenerateIntegrityScoreOutput } from "@/ai/flows/generate-integrity-score";
 import { generateDueDiligenceQuestions } from "@/ai/flows/generate-due-diligence-questions";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "../ui/badge";
 
-type IntegrityScoreResult = {
-  integrityScore: string;
-  greenLights: string;
-  redFlags: string;
-};
 
-export default function FounderAnalysis() {
+interface FounderAnalysisProps {
+  setAnalysisResult: (result: GenerateIntegrityScoreOutput | null) => void;
+}
+
+
+export default function FounderAnalysis({ setAnalysisResult }: FounderAnalysisProps) {
   const [isPending, startTransition] = useTransition();
   const [isQuestionsPending, startQuestionsTransition] = useTransition();
   const [bios, setBios] = useState("");
-  const [result, setResult] = useState<IntegrityScoreResult | null>(null);
+  const [result, setResult] = useState<GenerateIntegrityScoreOutput | null>(null);
   const [questions, setQuestions] = useState<string | null>(null);
   const { toast } = useToast();
 
@@ -44,11 +44,13 @@ export default function FounderAnalysis() {
 
     setResult(null);
     setQuestions(null);
+    setAnalysisResult(null);
 
     startTransition(async () => {
       try {
         const scoreResult = await generateIntegrityScore({ founderBios: bios });
         setResult(scoreResult);
+        setAnalysisResult(scoreResult);
         generateQuestions(scoreResult);
       } catch (error) {
         console.error("Error generating integrity score:", error);
@@ -61,7 +63,7 @@ export default function FounderAnalysis() {
     });
   };
 
-  const generateQuestions = (scoreResult: IntegrityScoreResult) => {
+  const generateQuestions = (scoreResult: GenerateIntegrityScoreOutput) => {
     startQuestionsTransition(async () => {
       try {
         const questionsResult = await generateDueDiligenceQuestions({

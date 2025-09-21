@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { mockStartupData, Startup } from "@/lib/data";
-import { benchmarkStartupAgainstPeers } from "@/ai/flows/benchmark-startup-against-peers";
+import { benchmarkStartupAgainstPeers, BenchmarkStartupAgainstPeersOutput } from "@/ai/flows/benchmark-startup-against-peers";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Search, Zap } from "lucide-react";
 import { ScrollArea } from "../ui/scroll-area";
@@ -29,21 +29,20 @@ import {
   Radar,
 } from "recharts";
 
-type BenchmarkResult = {
-  analysis: string;
-  radarChartData: string;
-};
+interface PeerBenchmarkingProps {
+  setAnalysisResult: (result: BenchmarkStartupAgainstPeersOutput | null) => void;
+}
 
 type RadarDataItem = {
   metric: string;
   [key: string]: string | number;
 };
 
-export default function PeerBenchmarking() {
+export default function PeerBenchmarking({ setAnalysisResult }: PeerBenchmarkingProps) {
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStartup, setSelectedStartup] = useState<Startup | null>(null);
-  const [result, setResult] = useState<BenchmarkResult | null>(null);
+  const [result, setResult] = useState<BenchmarkStartupAgainstPeersOutput | null>(null);
   const { toast } = useToast();
 
   const filteredStartups = useMemo(() => {
@@ -56,6 +55,7 @@ export default function PeerBenchmarking() {
   const handleSelectStartup = (startup: Startup) => {
     setSelectedStartup(startup);
     setResult(null);
+    setAnalysisResult(null);
     startTransition(async () => {
       try {
         const benchmarkResult = await benchmarkStartupAgainstPeers({
@@ -66,6 +66,7 @@ export default function PeerBenchmarking() {
           stage: startup.stage,
         });
         setResult(benchmarkResult);
+        setAnalysisResult(benchmarkResult);
       } catch (error) {
         console.error("Error benchmarking startup:", error);
         toast({

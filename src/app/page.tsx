@@ -6,25 +6,34 @@ import FounderAnalysis from "@/components/dashboard/founder-analysis";
 import DocumentAnalysis from "@/components/dashboard/document-analysis";
 import PeerBenchmarking from "@/components/dashboard/peer-benchmarking";
 import CompanyInsights from '@/components/dashboard/company-insights';
-import { FileText, Users, Scaling, Building2 } from 'lucide-react';
+import InvestmentMemo from '@/components/dashboard/investment-memo';
+import { FileText, Users, Scaling, Building2, FileCheck } from 'lucide-react';
 
-type Tab = 'founder-analysis' | 'document-discrepancy' | 'peer-benchmarking' | 'company-insights';
+type Tab = 'founder-analysis' | 'document-discrepancy' | 'peer-benchmarking' | 'company-insights' | 'investment-memo';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<Tab>('founder-analysis');
 
+  // State to hold analysis results
+  const [founderResult, setFounderResult] = useState(null);
+  const [docResult, setDocResult] = useState(null);
+  const [peerResult, setPeerResult] = useState(null);
+  const [companyResult, setCompanyResult] = useState(null);
+
   const renderContent = () => {
     switch (activeTab) {
       case 'founder-analysis':
-        return <FounderAnalysis />;
+        return <FounderAnalysis setAnalysisResult={setFounderResult} />;
       case 'document-discrepancy':
-        return <DocumentAnalysis />;
+        return <DocumentAnalysis setAnalysisResult={setDocResult} />;
       case 'peer-benchmarking':
-        return <PeerBenchmarking />;
+        return <PeerBenchmarking setAnalysisResult={setPeerResult} />;
       case 'company-insights':
-        return <CompanyInsights />;
+        return <CompanyInsights setAnalysisResult={setCompanyResult} />;
+      case 'investment-memo':
+        return <InvestmentMemo founderResult={founderResult} docResult={docResult} peerResult={peerResult} companyResult={companyResult} />;
       default:
-        return <FounderAnalysis />;
+        return <FounderAnalysis setAnalysisResult={setFounderResult} />;
     }
   };
 
@@ -46,6 +55,9 @@ export default function Home() {
               </SidebarMenuItem>
                <SidebarMenuItem>
                 <SidebarMenuButton onClick={() => setActiveTab('company-insights')} isActive={activeTab === 'company-insights'}><Building2 />Company Insights</SidebarMenuButton>
+              </SidebarMenuItem>
+               <SidebarMenuItem>
+                <SidebarMenuButton onClick={() => setActiveTab('investment-memo')} isActive={activeTab === 'investment-memo'}><FileCheck />Investment Memo</SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </Sidebar>
