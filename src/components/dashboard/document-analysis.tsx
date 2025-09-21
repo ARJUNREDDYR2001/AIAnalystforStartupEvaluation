@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useTransition, useCallback } from "react";
-import { useToast } from "@/components/ui";
+import { useToast } from "@/hooks/use-toast";
 import {
   Card,
   CardContent,
@@ -17,8 +17,8 @@ import { detectDocumentDiscrepancies, DetectDocumentDiscrepanciesOutput } from "
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface FileContent {
-  name: string;
-  content: string;
+  fileName: string;
+  text: string;
   numPages: number;
   info: any;
 }
@@ -45,83 +45,61 @@ export function DocumentAnalysis({ setAnalysisResult }: DocumentAnalysisProps) {
     
     setLoading(true);
     setError(null);
+    setResult(null);
+    setAnalysisResult(null);
     
-    const newFileNames: string[] = [];
-    let combinedContent = "";
-    
+    const newFileNames: string[] = Array.from(files).map(f => f.name);
+    setFileNames(newFileNames);
+
+    const formData = new FormData();
+    Array.from(files).forEach((file) => {
+      formData.append('files', file);
+    });
+
     try {
-      const formData = new FormData();
-      Array.from(files).forEach((file) => {
-        formData.append('files', file);
-        newFileNames.push(file.name);
-      });
-      
       const response = await fetch('/api/process-pdf', {
         method: 'POST',
         body: formData,
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || 'Failed to process PDFs');
       }
+
+      const responseData = await response.json();
+      const processedFiles: FileContent[] = responseData.results;
       
-      const result = await response.json();
-      
-      // Process the results
-      const fileContents: FileContent[] = result.results.map((fileResult: any) => {
-        if (fileResult.error) {
-          throw new Error(`Error processing ${fileResult.fileName}: ${fileResult.error}`);
-        }
-        return {
-          name: fileResult.fileName,
-          content: fileResult.text,
-          numPages: fileResult.numPages || 0,
-          info: fileResult.info || {}
-        };
-      });
-      
-      // Combine all file contents
-      combinedContent = fileContents.map(fc => fc.content).join('\n\n');
-      
-      // Update state
-      setDocumentContent(combinedContent);
-      setFileNames(newFileNames);
-      
-      // Call the analysis callback if provided
-      if (setAnalysisResult) {
-        setAnalysisResult({
-          success: true,
-          content: combinedContent,
-          files: fileContents
-        } as any);
+      const successfulFiles = processedFiles.filter(f => !f.error);
+
+      if (successfulFiles.length === 0) {
+          throw new Error('All files failed to process.');
       }
-      
+
+      const combinedText = successfulFiles.map(f => `--- Document: ${f.fileName} ---\n\n${f.text}`).join('\n\n');
+      setDocumentContent(combinedText);
+
       toast({
-        title: "Success",
-        description: `Successfully processed ${fileContents.length} PDF file(s)`,
+        title: "Files Processed",
+        description: `${successfulFiles.length} out of ${files.length} file(s) were processed successfully.`,
       });
       
     } catch (error) {
-      console.error('Error processing files:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
       setError(errorMessage);
-      
-      if (toast) {
-        toast({
-          title: "Error",
-          description: errorMessage,
-          variant: "destructive",
-        });
-      }
-      
-      // Clear previous results
-      setResult(null);
-      if (setAnalysisResult) {
-        setAnalysisResult(null);
-      }
+      toast({
+        title: "Error Processing Files",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      setFileNames([]);
+      setDocumentContent('');
     } finally {
       setLoading(false);
+      // Reset the file input so the user can upload the same file again
+      if(fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -195,10 +173,19 @@ export function DocumentAnalysis({ setAnalysisResult }: DocumentAnalysisProps) {
                 multiple
               />
             <div className="text-center">
-              <FileUp className="mx-auto h-12 w-12 text-muted-foreground" />
-              <p className="mt-4 text-sm text-muted-foreground">
-                Click to browse or drag and drop PDF files
-              </p>
+              {loading ? (
+                <div className="flex flex-col items-center">
+                  <Loader2 className="mx-auto h-12 w-12 animate-spin text-muted-foreground" />
+                  <p className="mt-4 text-sm text-muted-foreground">Processing PDF(s)...</p>
+                </div>
+              ) : (
+                <>
+                  <FileUp className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <p className="mt-4 text-sm text-muted-foreground">
+                    Click to browse or drag and drop PDF files
+                  </p>
+                </>
+              )}
             </div>
           </div>
           {fileNames.length > 0 && (
@@ -219,7 +206,7 @@ export function DocumentAnalysis({ setAnalysisResult }: DocumentAnalysisProps) {
         <CardFooter>
           <Button
             onClick={handleAnalyzeDocument}
-            disabled={isPending || !documentContent}
+            disabled={isPending || !documentContent || loading}
             className="w-full sm:w-auto sm:ml-auto"
           >
             {isPending ? (
