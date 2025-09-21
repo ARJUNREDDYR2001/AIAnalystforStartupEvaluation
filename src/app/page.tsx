@@ -23,9 +23,6 @@ const DashboardSidebarContent = ({ activeTab, setActiveTab }: { activeTab: Tab, 
 
   return (
     <SidebarMenu className="p-3 space-y-1 flex-1">
-      <SidebarMenuItem>
-        <Link href="/dashboard" className="group flex items-center w-full px-3 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700/50">Dashboard</Link>
-      </SidebarMenuItem>
       {menuItems.map((item) => (
         <SidebarMenuItem key={item.id}>
           <SidebarMenuButton 
@@ -94,7 +91,7 @@ export default function Home() {
         </div>
         
         {/* Main Content */}
-        <div className="flex-1 bg-slate-100 dark:bg-slate-900/50">
+        <div className="flex-1 bg-slate-900/50">
           {/* Mobile Menu Button */}
           <div className="md:hidden fixed top-16 left-0 right-0 z-30 bg-slate-800/95 backdrop-blur-md p-4 border-b border-slate-700 shadow-sm">
             <SidebarTrigger>
