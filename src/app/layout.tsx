@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Sidebar, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarProvider } from '@/components/ui/sidebar';
 import { Header } from '@/components/layout/header';
 import { Button } from '@/components/ui/button';
-import { FileText, Users, Scaling, Building2, FileCheck, Info, Phone } from 'lucide-react';
+import { FileText, Users, Scaling, Building2, FileCheck, Info, Phone, LayoutDashboard } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'VentureLens AI',
@@ -30,33 +30,13 @@ export default function RootLayout({
           <div className="flex flex-col min-h-screen">
             <Header />
             <div className="flex flex-1">
-              <Sidebar side="left" className="glass-nav !border-r !border-white/10 md:w-64 hidden md:flex">
-                  <SidebarMenu className="p-4 space-y-2">
-                    <SidebarMenuItem>
-                      <Button variant="ghost" asChild className="justify-start w-full">
-                          <Link href="/"><Users />Founder Analysis</Link>
-                      </Button>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                       <Button variant="ghost" asChild className="justify-start w-full">
-                          <Link href="/"><FileText />Document Discrepancy</Link>
-                       </Button>
-                    </SidebarMenuItem>
-                    <SidebarMenuItem>
-                       <Button variant="ghost" asChild className="justify-start w-full">
-                          <Link href="/"><Scaling />Peer Benchmarking</Link>
-                       </Button>
-                    </SidebarMenuItem>
-                      <SidebarMenuItem>
-                       <Button variant="ghost" asChild className="justify-start w-full">
-                          <Link href="/"><Building2 />Company Insights</Link>
-                       </Button>
-                    </SidebarMenuItem>
-                      <SidebarMenuItem>
-                       <Button variant="ghost" asChild className="justify-start w-full">
-                          <Link href="/"><FileCheck />Investment Memo</Link>
-                       </Button>
-                    </SidebarMenuItem>
+              <Sidebar side="left" className="glass-nav !border-r !border-white/10 md:w-64 hidden md:flex flex-col" collapsible="none">
+                  <SidebarMenu className="p-4 space-y-2 flex-1">
+                     <SidebarMenuItem>
+                        <Button variant="ghost" asChild className="justify-start w-full">
+                            <Link href="/"><LayoutDashboard />Dashboard</Link>
+                        </Button>
+                      </SidebarMenuItem>
                   </SidebarMenu>
                  <div className="p-4 mt-auto border-t border-border/50">
                     <nav className="flex flex-col gap-2">
