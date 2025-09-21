@@ -1,4 +1,5 @@
 import type {NextConfig} from 'next';
+require('dotenv').config({ path: './.env.local' });
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -46,14 +47,10 @@ const nextConfig: NextConfig = {
         'https': false,
         'url': false,
       };
-      
-      // Exclude pdf-parse from client-side bundles
-      config.externals = [...(config.externals || []), 'pdf-parse'];
     }
 
     return config;
   },
-  // Disable server-side rendering for pages that use pdf-parse
   experimental: {
     serverComponentsExternalPackages: ['pdf-parse'],
   }
