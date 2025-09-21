@@ -20,7 +20,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased min-h-screen bg-background">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-900/30 via-purple-900/20 to-stone-900/40 z-[-1]"></div>
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-teal-100 via-blue-100 to-gray-100 dark:from-indigo-900/30 dark:via-purple-900/20 dark:to-stone-900/40 z-[-1]"></div>
         {children}
         <Toaster />
       </body>
