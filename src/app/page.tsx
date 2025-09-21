@@ -39,8 +39,8 @@ export default function Home() {
   };
 
   return (
-      <div className="flex flex-1">
-        <Sidebar side="left" className="glass-nav !border-r !border-white/10 md:w-64">
+      <>
+        <Sidebar side="left" className="glass-nav !border-r !border-white/10 md:hidden">
           <SidebarMenu className="p-4 space-y-2">
             <SidebarMenuItem>
               <SidebarMenuButton onClick={() => setActiveTab('founder-analysis')} isActive={activeTab === 'founder-analysis'}><Users />Founder Analysis</SidebarMenuButton>
@@ -59,7 +59,7 @@ export default function Home() {
             </SidebarMenuItem>
           </SidebarMenu>
 
-            <div className="p-4 mt-auto border-t border-border/50 md:hidden">
+            <div className="p-4 mt-auto border-t border-border/50">
               <nav className="flex flex-col gap-2">
                   <Button variant="ghost" asChild className="justify-start">
                     <Link href="/about"><Info className="mr-2"/>About</Link>
@@ -69,11 +69,9 @@ export default function Home() {
                   </Button>
               </nav>
           </div>
-
         </Sidebar>
-        <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-auto">
-          {renderContent()}
-        </main>
-      </div>
+        
+        {renderContent()}
+      </>
   );
 }
