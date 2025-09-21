@@ -15,7 +15,6 @@ import { Loader2, FileUp, AlertTriangle, Quote, CheckCircle2, FileText, X } from
 import { detectDocumentDiscrepancies, DetectDocumentDiscrepanciesOutput } from "@/ai/flows/detect-document-discrepancies";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import pdf from "pdf-parse/lib/pdf-parse";
 
 interface DocumentAnalysisProps {
   setAnalysisResult: (result: DetectDocumentDiscrepanciesOutput | null) => void;
@@ -31,51 +30,54 @@ export default function DocumentAnalysis({ setAnalysisResult }: DocumentAnalysis
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (files && files.length > 0) {
-      const newFileNames: string[] = [];
-      let combinedContent = "";
-      
-      const pdfParsePromises = Array.from(files).map(file => {
-        return new Promise<string>((resolve, reject) => {
-          if (file.type === "application/pdf") {
-            newFileNames.push(file.name);
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-              try {
-                const data = await pdf(Buffer.from(e.target?.result as ArrayBuffer));
-                resolve(data.text);
-              } catch (error) {
-                console.error("Error parsing PDF:", error);
-                toast({
-                  title: "PDF Parsing Error",
-                  description: `Could not parse ${file.name}.`,
-                  variant: "destructive",
-                });
-                reject(error);
-              }
-            };
-            reader.readAsArrayBuffer(file);
-          } else {
+    if (!files || files.length === 0) {
+      return;
+    }
+    
+    // Dynamically import pdf-parse only on the client-side when needed
+    const pdf = (await import('pdf-parse/lib/pdf-parse')).default;
+
+    const newFileNames: string[] = [];
+    let combinedContent = "";
+
+    const filePromises = Array.from(files).map(file => {
+      return new Promise<string>((resolve, reject) => {
+        newFileNames.push(file.name);
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+          try {
+            if (e.target?.result) {
+              const data = await pdf(Buffer.from(e.target.result as ArrayBuffer));
+              resolve(data.text);
+            } else {
+              reject(new Error("Failed to read file."));
+            }
+          } catch (error) {
+            console.error(`Error parsing ${file.name}:`, error);
             toast({
-              title: "Invalid File Type",
-              description: "Please upload PDF files only.",
+              title: "PDF Parsing Error",
+              description: `Could not parse ${file.name}. It might be corrupted or protected.`,
               variant: "destructive",
             });
-            reject(new Error("Invalid file type"));
+            reject(error);
           }
-        });
+        };
+        reader.onerror = (error) => {
+            reject(error);
+        }
+        reader.readAsArrayBuffer(file);
       });
+    });
 
-      try {
-        const contents = await Promise.all(pdfParsePromises);
-        combinedContent = contents.join("\n\n---\n\n");
-        setDocumentContent(combinedContent);
-        setFileNames(newFileNames);
-        setResult(null);
-        setAnalysisResult(null);
-      } catch (error) {
-        // Errors are toasted inside the promise rejection
-      }
+    try {
+      const contents = await Promise.all(filePromises);
+      combinedContent = contents.join("\n\n---\n\n");
+      setDocumentContent(combinedContent);
+      setFileNames(newFileNames);
+      setResult(null);
+      setAnalysisResult(null);
+    } catch (error) {
+      console.error("Failed to process one or more files.", error);
     }
   };
 
@@ -157,20 +159,16 @@ export default function DocumentAnalysis({ setAnalysisResult }: DocumentAnalysis
           </div>
           {fileNames.length > 0 && (
             <div className="mt-4 space-y-2">
-              {fileNames.map((name, i) => (
-                <div key={i} className="flex items-center justify-between rounded-md border bg-muted/50 p-3">
-                  <div className="flex items-center gap-3">
-                    <FileText className="h-5 w-5 text-muted-foreground" />
-                    <span className="text-sm font-medium">{name}</span>
+              <div className="flex items-center justify-between rounded-md border bg-muted/50 p-3">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    <FileText className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                    <span className="text-sm font-medium truncate" title={fileNames.join(', ')}>{fileNames.join(', ')}</span>
                   </div>
-                   {i === fileNames.length - 1 && (
-                     <Button variant="ghost" size="icon" onClick={clearFiles} className="h-6 w-6">
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">Clear all files</span>
-                      </Button>
-                   )}
+                   <Button variant="ghost" size="icon" onClick={clearFiles} className="h-6 w-6 flex-shrink-0">
+                      <X className="h-4 w-4" />
+                      <span className="sr-only">Clear all files</span>
+                    </Button>
                 </div>
-              ))}
             </div>
           )}
         </CardContent>
