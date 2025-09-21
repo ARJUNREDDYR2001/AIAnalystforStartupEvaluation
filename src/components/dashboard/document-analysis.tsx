@@ -15,36 +15,65 @@ import { Loader2, FileUp, AlertTriangle, Quote, CheckCircle2, FileText, X } from
 import { detectDocumentDiscrepancies, DetectDocumentDiscrepanciesOutput } from "@/ai/flows/detect-document-discrepancies";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import pdf from "pdf-parse/lib/pdf-parse";
 
 export default function DocumentAnalysis() {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<DetectDocumentDiscrepanciesOutput | null>(null);
   const [documentContent, setDocumentContent] = useState<string>("");
-  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileNames, setFileNames] = useState<string[]>([]);
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.type === "text/plain") {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const content = e.target?.result as string;
-          setDocumentContent(content);
-          setFileName(file.name);
-          setResult(null);
-        };
-        reader.readAsText(file);
-      } else {
-        toast({
-          title: "Invalid File Type",
-          description: "Please upload a .txt file.",
-          variant: "destructive",
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const newFileNames: string[] = [];
+      let combinedContent = "";
+      
+      const pdfParsePromises = Array.from(files).map(file => {
+        return new Promise<string>((resolve, reject) => {
+          if (file.type === "application/pdf") {
+            newFileNames.push(file.name);
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+              try {
+                const data = await pdf(Buffer.from(e.target?.result as ArrayBuffer));
+                resolve(data.text);
+              } catch (error) {
+                console.error("Error parsing PDF:", error);
+                toast({
+                  title: "PDF Parsing Error",
+                  description: `Could not parse ${file.name}.`,
+                  variant: "destructive",
+                });
+                reject(error);
+              }
+            };
+            reader.readAsArrayBuffer(file);
+          } else {
+            toast({
+              title: "Invalid File Type",
+              description: "Please upload PDF files only.",
+              variant: "destructive",
+            });
+            reject(new Error("Invalid file type"));
+          }
         });
+      });
+
+      try {
+        const contents = await Promise.all(pdfParsePromises);
+        combinedContent = contents.join("\n\n---\n\n");
+        setDocumentContent(combinedContent);
+        setFileNames(newFileNames);
+        setResult(null);
+      } catch (error) {
+        // Errors are toasted inside the promise rejection
       }
     }
   };
+
 
   const handleAnalyzeDocument = () => {
     if (!documentContent) {
@@ -60,29 +89,29 @@ export default function DocumentAnalysis() {
       try {
         const analysisResult = await detectDocumentDiscrepancies({
           documentContent: documentContent,
-          documentType: "text",
+          documentType: "pdf",
         });
         setResult(analysisResult);
         if (analysisResult.discrepancies.length === 0) {
           toast({
             title: "Analysis Complete",
-            description: "No discrepancies were found in the document.",
+            description: "No discrepancies were found in the document(s).",
           });
         }
       } catch (error) {
         console.error("Error analyzing document:", error);
         toast({
           title: "Analysis Failed",
-          description: "Could not analyze the document. Please try again.",
+          description: "Could not analyze the document(s). Please try again.",
           variant: "destructive",
         });
       }
     });
   };
 
-  const clearFile = () => {
+  const clearFiles = () => {
     setDocumentContent("");
-    setFileName(null);
+    setFileNames([]);
     setResult(null);
     if(fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -95,7 +124,7 @@ export default function DocumentAnalysis() {
         <CardHeader>
           <CardTitle>Document Discrepancy Detection</CardTitle>
           <CardDescription>
-            Upload a .txt document to automatically detect discrepancies in key numbers and claims.
+            Upload one or more PDF documents to automatically detect discrepancies in key numbers and claims.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -108,24 +137,32 @@ export default function DocumentAnalysis() {
                 ref={fileInputRef}
                 onChange={handleFileChange}
                 className="hidden"
-                accept=".txt"
+                accept=".pdf"
+                multiple
               />
             <div className="text-center">
               <FileUp className="mx-auto h-12 w-12 text-muted-foreground" />
               <p className="mt-4 text-sm text-muted-foreground">
-                Click to browse or drag and drop a .txt file
+                Click to browse or drag and drop PDF files
               </p>
             </div>
           </div>
-          {fileName && (
-            <div className="mt-4 flex items-center justify-between rounded-md border bg-muted/50 p-3">
-              <div className="flex items-center gap-3">
-                <FileText className="h-5 w-5 text-muted-foreground" />
-                <span className="text-sm font-medium">{fileName}</span>
-              </div>
-              <Button variant="ghost" size="icon" onClick={clearFile} className="h-6 w-6">
-                <X className="h-4 w-4" />
-              </Button>
+          {fileNames.length > 0 && (
+            <div className="mt-4 space-y-2">
+              {fileNames.map((name, i) => (
+                <div key={i} className="flex items-center justify-between rounded-md border bg-muted/50 p-3">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <span className="text-sm font-medium">{name}</span>
+                  </div>
+                   {i === fileNames.length - 1 && (
+                     <Button variant="ghost" size="icon" onClick={clearFiles} className="h-6 w-6">
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Clear all files</span>
+                      </Button>
+                   )}
+                </div>
+              ))}
             </div>
           )}
         </CardContent>
@@ -140,7 +177,7 @@ export default function DocumentAnalysis() {
             ) : (
               <FileUp />
             )}
-            Analyze Document
+            Analyze Documents
           </Button>
         </CardFooter>
       </Card>
@@ -157,7 +194,7 @@ export default function DocumentAnalysis() {
           <CardHeader>
             <CardTitle>Discrepancy Report</CardTitle>
             <CardDescription>
-              {result.discrepancies.length} {result.discrepancies.length === 1 ? 'discrepancy' : 'discrepancies'} found in the document.
+              {result.discrepancies.length} {result.discrepancies.length === 1 ? 'discrepancy' : 'discrepancies'} found in the document(s).
             </CardDescription>
           </CardHeader>
           <CardContent>
