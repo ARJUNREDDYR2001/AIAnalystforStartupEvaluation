@@ -59,13 +59,13 @@ export default function Home() {
             </SidebarMenuItem>
           </SidebarMenu>
 
-            <div className="p-4 mt-auto md:hidden">
+            <div className="p-4 mt-auto border-t border-border/50 md:hidden">
               <nav className="flex flex-col gap-2">
                   <Button variant="ghost" asChild className="justify-start">
-                  <Link href="/about"><Info />About</Link>
+                    <Link href="/about"><Info className="mr-2"/>About</Link>
                   </Button>
                   <Button variant="ghost" asChild className="justify-start">
-                  <Link href="/contact"><Phone />Contact</Link>
+                    <Link href="/contact"><Phone className="mr-2"/>Contact</Link>
                   </Button>
               </nav>
           </div>

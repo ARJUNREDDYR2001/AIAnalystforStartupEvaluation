@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Flame } from "lucide-react";
+import { Flame, Info, Phone } from "lucide-react";
 import { SidebarTrigger } from "../ui/sidebar";
 import { Button } from "../ui/button";
 
@@ -22,9 +22,6 @@ export function Header() {
       </div>
 
       <nav className="hidden md:flex items-center gap-2">
-        <Button variant="ghost" asChild>
-          <Link href="/">Dashboard</Link>
-        </Button>
         <Button variant="ghost" asChild>
           <Link href="/about">About</Link>
         </Button>
