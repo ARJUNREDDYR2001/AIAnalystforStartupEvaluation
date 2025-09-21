@@ -36,14 +36,26 @@ const nextConfig: NextConfig = {
       config.resolve.fallback = {
         ...config.resolve.fallback, // Spread the existing fallback configuration
         fs: false,
+        path: false,
+        os: false,
+        crypto: false,
+        stream: false,
+        constants: false,
         'node-fetch': false,
         'http': false,
         'https': false,
         'url': false,
       };
+      
+      // Exclude pdf-parse from client-side bundles
+      config.externals = [...(config.externals || []), 'pdf-parse'];
     }
 
     return config;
+  },
+  // Disable server-side rendering for pages that use pdf-parse
+  experimental: {
+    serverComponentsExternalPackages: ['pdf-parse'],
   }
 };
 

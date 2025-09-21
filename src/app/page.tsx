@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Header } from "@/components/layout/header";
 import { SidebarProvider, Sidebar, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import FounderAnalysis from "@/components/dashboard/founder-analysis";
-import DocumentAnalysis from "@/components/dashboard/document-analysis";
+import { DocumentAnalysis } from "@/components/dashboard/document-analysis";
 import PeerBenchmarking from "@/components/dashboard/peer-benchmarking";
 import CompanyInsights from '@/components/dashboard/company-insights';
 import InvestmentMemo from '@/components/dashboard/investment-memo';

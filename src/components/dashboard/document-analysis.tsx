@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useRef, useTransition, useCallback } from "react";
+import { useToast } from "@/components/ui";
 import {
   Card,
   CardContent,
@@ -13,18 +14,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, FileUp, AlertTriangle, Quote, CheckCircle2, FileText, X } from "lucide-react";
 import { detectDocumentDiscrepancies, DetectDocumentDiscrepanciesOutput } from "@/ai/flows/detect-document-discrepancies";
-import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-interface DocumentAnalysisProps {
-  setAnalysisResult: (result: DetectDocumentDiscrepanciesOutput | null) => void;
+interface FileContent {
+  name: string;
+  content: string;
+  numPages: number;
+  info: any;
 }
 
-export default function DocumentAnalysis({ setAnalysisResult }: DocumentAnalysisProps) {
-  const [isPending, startTransition] = useTransition();
-  const [result, setResult] = useState<DetectDocumentDiscrepanciesOutput | null>(null);
-  const [documentContent, setDocumentContent] = useState<string>("");
+interface DocumentAnalysisProps {
+  readonly setAnalysisResult: (result: DetectDocumentDiscrepanciesOutput | null) => void;
+}
+
+export function DocumentAnalysis({ setAnalysisResult }: DocumentAnalysisProps) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [fileNames, setFileNames] = useState<string[]>([]);
+  const [documentContent, setDocumentContent] = useState<string>('');
+  const [result, setResult] = useState<DetectDocumentDiscrepanciesOutput | null>(null);
+  const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,55 +43,90 @@ export default function DocumentAnalysis({ setAnalysisResult }: DocumentAnalysis
       return;
     }
     
-    // Dynamically import pdf-parse only on the client-side when needed
-    const pdf = (await import('pdf-parse')).default;
-
+    setLoading(true);
+    setError(null);
+    
     const newFileNames: string[] = [];
     let combinedContent = "";
-
-    const filePromises = Array.from(files).map(file => {
-      return new Promise<string>((resolve, reject) => {
-        newFileNames.push(file.name);
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-          try {
-            if (e.target?.result) {
-              const data = await pdf(Buffer.from(e.target.result as ArrayBuffer));
-              resolve(data.text);
-            } else {
-              reject(new Error("Failed to read file."));
-            }
-          } catch (error) {
-            console.error(`Error parsing ${file.name}:`, error);
-            toast({
-              title: "PDF Parsing Error",
-              description: `Could not parse ${file.name}. It might be corrupted or protected.`,
-              variant: "destructive",
-            });
-            reject(error);
-          }
-        };
-        reader.onerror = (error) => {
-            reject(error);
-        }
-        reader.readAsArrayBuffer(file);
-      });
-    });
-
+    
     try {
-      const contents = await Promise.all(filePromises);
-      combinedContent = contents.join("\n\n---\n\n");
+      const formData = new FormData();
+      Array.from(files).forEach((file) => {
+        formData.append('files', file);
+        newFileNames.push(file.name);
+      });
+      
+      const response = await fetch('/api/process-pdf', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to process PDFs');
+      }
+      
+      const result = await response.json();
+      
+      // Process the results
+      const fileContents: FileContent[] = result.results.map((fileResult: any) => {
+        if (fileResult.error) {
+          throw new Error(`Error processing ${fileResult.fileName}: ${fileResult.error}`);
+        }
+        return {
+          name: fileResult.fileName,
+          content: fileResult.text,
+          numPages: fileResult.numPages || 0,
+          info: fileResult.info || {}
+        };
+      });
+      
+      // Combine all file contents
+      combinedContent = fileContents.map(fc => fc.content).join('\n\n');
+      
+      // Update state
       setDocumentContent(combinedContent);
       setFileNames(newFileNames);
-      setResult(null);
-      setAnalysisResult(null);
+      
+      // Call the analysis callback if provided
+      if (setAnalysisResult) {
+        setAnalysisResult({
+          success: true,
+          content: combinedContent,
+          files: fileContents
+        } as any);
+      }
+      
+      toast({
+        title: "Success",
+        description: `Successfully processed ${fileContents.length} PDF file(s)`,
+      });
+      
     } catch (error) {
-      console.error("Failed to process one or more files.", error);
+      console.error('Error processing files:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      setError(errorMessage);
+      
+      if (toast) {
+        toast({
+          title: "Error",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      }
+      
+      // Clear previous results
+      setResult(null);
+      if (setAnalysisResult) {
+        setAnalysisResult(null);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
 
-  const handleAnalyzeDocument = () => {
+  const handleAnalyzeDocument = useCallback(() => {
     if (!documentContent) {
       toast({
         title: "No Document",
@@ -116,17 +160,17 @@ export default function DocumentAnalysis({ setAnalysisResult }: DocumentAnalysis
         });
       }
     });
-  };
+  }, [documentContent, setAnalysisResult, startTransition, toast]);
 
-  const clearFiles = () => {
-    setDocumentContent("");
+  const clearFiles = useCallback(() => {
+    setDocumentContent('');
     setFileNames([]);
     setResult(null);
-    setAnalysisResult(null);
-    if(fileInputRef.current) {
-        fileInputRef.current.value = "";
+    setAnalysisResult?.(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
-  }
+  }, [setAnalysisResult]);
 
   return (
     <div className="grid gap-8">
