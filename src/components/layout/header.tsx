@@ -11,7 +11,7 @@ export function Header() {
         </div>
         <div>
             <h1 className="text-xl font-semibold tracking-tight text-foreground font-headline">
-            Fireside AI
+            VentureLens AI
             </h1>
             <p className="text-xs text-muted-foreground">AI Analyst for Startup Evaluation</p>
         </div>

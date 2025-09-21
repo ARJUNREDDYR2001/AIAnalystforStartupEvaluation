@@ -1,6 +1,6 @@
-# Fireside AI
+# VentureLens AI
 
-Fireside AI is a Next.js application that provides AI-powered due diligence tools for venture capitalists. It helps investors analyze startups by assessing founder backgrounds, detecting discrepancies in documents, benchmarking companies against their peers, and synthesizing all data into a final investment memo.
+VentureLens AI is a Next.js application that provides AI-powered due diligence tools for venture capitalists. It helps investors analyze startups by assessing founder backgrounds, detecting discrepancies in documents, benchmarking companies against their peers, and synthesizing all data into a final investment memo.
 
 ## Features
 
