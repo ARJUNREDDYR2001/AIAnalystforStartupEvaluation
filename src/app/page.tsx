@@ -41,28 +41,87 @@ export default function Home() {
     <SidebarProvider>
       <div className="flex flex-col min-h-screen">
         <Header />
-        <div className="flex flex-1">
-          <Sidebar side="left" className="glass-nav !border-r !border-white/10 md:w-64">
-            <SidebarMenu className="p-4 space-y-2">
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => setActiveTab('founder-analysis')} isActive={activeTab === 'founder-analysis'}><Users />Founder Analysis</SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => setActiveTab('document-discrepancy')} isActive={activeTab === 'document-discrepancy'}><FileText />Document Discrepancy</SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => setActiveTab('peer-benchmarking')} isActive={activeTab === 'peer-benchmarking'}><Scaling />Peer Benchmarking</SidebarMenuButton>
-              </SidebarMenuItem>
-               <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => setActiveTab('company-insights')} isActive={activeTab === 'company-insights'}><Building2 />Company Insights</SidebarMenuButton>
-              </SidebarMenuItem>
-               <SidebarMenuItem>
-                <SidebarMenuButton onClick={() => setActiveTab('investment-memo')} isActive={activeTab === 'investment-memo'}><FileCheck />Investment Memo</SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
+        <div className="flex flex-1 pt-16">
+          <Sidebar side="left" className="glass-nav !border-r !border-white/10 md:w-64 fixed top-16 bottom-0 overflow-y-auto">
+            <div className="p-4 space-y-6">
+              {/* Analysis Section */}
+              <div className="space-y-1">
+                <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Analysis</h3>
+                <SidebarMenu className="space-y-1">
+                  <SidebarMenuItem>
+                    <SidebarMenuButton 
+                      onClick={() => setActiveTab('founder-analysis')} 
+                      isActive={activeTab === 'founder-analysis'}
+                      className="w-full justify-start"
+                    >
+                      <Users className="w-4 h-4 mr-3" />
+                      <span>Founder Analysis</span>
+                      <span className="ml-auto text-xs text-muted-foreground">AI</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton 
+                      onClick={() => setActiveTab('document-discrepancy')} 
+                      isActive={activeTab === 'document-discrepancy'}
+                      className="w-full justify-start"
+                    >
+                      <FileText className="w-4 h-4 mr-3" />
+                      <span>Document Analysis</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </div>
+
+              {/* Market Research Section */}
+              <div className="space-y-1">
+                <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Market Research</h3>
+                <SidebarMenu className="space-y-1">
+                  <SidebarMenuItem>
+                    <SidebarMenuButton 
+                      onClick={() => setActiveTab('peer-benchmarking')} 
+                      isActive={activeTab === 'peer-benchmarking'}
+                      className="w-full justify-start"
+                    >
+                      <Scaling className="w-4 h-4 mr-3" />
+                      <span>Peer Benchmarking</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton 
+                      onClick={() => setActiveTab('company-insights')} 
+                      isActive={activeTab === 'company-insights'}
+                      className="w-full justify-start"
+                    >
+                      <Building2 className="w-4 h-4 mr-3" />
+                      <span>Company Insights</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </div>
+
+              {/* Output Section */}
+              <div className="space-y-1">
+                <h3 className="px-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Output</h3>
+                <SidebarMenu className="space-y-1">
+                  <SidebarMenuItem>
+                    <SidebarMenuButton 
+                      onClick={() => setActiveTab('investment-memo')} 
+                      isActive={activeTab === 'investment-memo'}
+                      className="w-full justify-start"
+                    >
+                      <FileCheck className="w-4 h-4 mr-3" />
+                      <span>Investment Memo</span>
+                      <span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary">New</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </div>
+            </div>
           </Sidebar>
-          <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-auto">
-            {renderContent()}
+          <main className="flex-1 overflow-auto pl-0 md:pl-64 pt-4"> {/* Added left padding to account for sidebar */}
+            <div className="p-4 md:p-6">
+              {renderContent()}
+            </div>
           </main>
         </div>
       </div>
